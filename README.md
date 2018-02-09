@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://github.com/xEsk/BAMP/raw/master/BAMP/Resources/Assets.xcassets/AppIcon.appiconset/fondo_128.png"/>
-</p>
-
 #BAMP
 
 ##What is BAMP?
