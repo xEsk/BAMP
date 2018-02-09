@@ -1,4 +1,2 @@
 theme: jekyll-theme-cayman
 show_downloads: true
-title: BAMP
-description: BAMP is a small macOS utility to manage your local server based on Apache + MongoDB + PHP using the Homebrew toolkit.
