@@ -1,0 +1,6 @@
+[submodule "BAMP/3rd-party/NSRegEx"]
+	path = BAMP/3rd-party/NSRegEx
+	url=https://github.com/xEsk/NSRegEx.git
+[submodule "BAMP/3rd-party/STPrivilegedTask"]
+	path = BAMP/3rd-party/STPrivilegedTask
+	url = https://github.com/sveinbjornt/STPrivilegedTask.git

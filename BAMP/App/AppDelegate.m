@@ -1,0 +1,461 @@
+//
+//  AppDelegate.m
+//  BLAP
+//
+//  Created by Xesc on 10/1/18.
+//  Copyright © 2018 Beecubu. All rights reserved.
+//
+
+#import "AppDelegate.h"
+
+#import "NSString+RegEx.h"
+#import "STPrivilegedTask.h"
+
+@interface AppDelegate () <NSTableViewDataSource, NSTextFieldDelegate>
+{
+    BOOL _mongoAlreadyRunning;
+    
+    NSString *_apacheConf;
+    NSString *_currentDocumentsRoot;
+    NSArray<NSString *> *_phpVersions;
+    
+    NSMutableArray<NSMutableDictionary *> *_documentRoots;
+}
+
+@property (weak) IBOutlet NSWindow *window;
+
+@property (weak) IBOutlet NSVisualEffectView *uiBackground;
+@property (weak) IBOutlet NSPopUpButton *uiPHPs;
+@property (weak) IBOutlet NSSegmentedControl *uiServerStatus;
+@property (weak) IBOutlet NSTableView *uiDocumentRoots;
+@property (weak) IBOutlet NSButton *uiChangePHPCli;
+@property (weak) IBOutlet NSTextField *uiCurrentPHPVersion;
+
+@end
+
+@implementation AppDelegate
+
+- (void)applicationWillFinishLaunching:(NSNotification *)notification
+{
+    // init configurations
+    [self initApacheConfiguration];
+    [self locateInstalledPHPs];
+    _mongoAlreadyRunning = self.mongoIsRunning;
+    _currentDocumentsRoot = self.currentDocumentRoot;
+    // configure UI
+    [self.uiServerStatus setSelected:YES forSegment:self.apacheIsRunning ? 0 : 1];
+    [self.uiPHPs addItemsWithTitles:_phpVersions];
+    [self.uiPHPs selectItemWithTitle:self.currentPHP];
+    self.uiChangePHPCli.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"cli"] ? NSControlStateValueOn : NSControlStateValueOff;
+    self.uiCurrentPHPVersion.stringValue = [NSString stringWithFormat:@"(%@)", self.currentPHPCliVersion];
+	// load stored documents roots
+	[self loadDocumentRoots];
+}
+
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
+{
+    return YES;
+}
+
+#pragma mark - Tools
+
+- (NSString *)userShell
+{
+   return [[NSProcessInfo processInfo] environment][@"SHELL"];
+}
+
+- (NSString *)runCommand:(NSString *)commandToRun
+{
+    NSTask *task = [NSTask new];
+    task.launchPath = self.userShell;
+    task.arguments = @[@"-l", @"-c", commandToRun];
+    // create pipes
+    NSPipe *inPipe = [NSPipe pipe];
+    NSPipe *outPipe = [NSPipe pipe];
+    // setup pipes
+    [task setStandardInput:inPipe];
+    [task setStandardOutput:outPipe];
+    [task setStandardError:outPipe];
+    // run the command
+    [task launch];
+    // capture output
+    return [[NSString alloc] initWithData:[[outPipe fileHandleForReading] readDataToEndOfFile] encoding:NSUTF8StringEncoding];
+}
+
+- (NSString *)sudoRunCommand:(NSString *)commandToRun
+{
+    STPrivilegedTask *task = [STPrivilegedTask new];
+    task.launchPath = self.userShell;
+    // configure the task to run
+    task.arguments = @[@"-l", @"-c", commandToRun];
+    // Launch it, user is prompted for password
+    OSStatus err = [task launch];
+    // parse auth result
+    if (err == errAuthorizationSuccess)
+    {
+        // wait task to finish...
+        [task waitUntilExit];
+        // capture output
+        return [[NSString alloc] initWithData:[[task outputFileHandle] readDataToEndOfFile] encoding:NSUTF8StringEncoding];
+    }
+    return nil;
+}
+
+#pragma mark - Apache methods
+
+- (void)initApacheConfiguration
+{
+    if ( ! _apacheConf)
+    {
+        _apacheConf = [[self runCommand:@"apachectl -V | grep SERVER_CONFIG_FILE"] stringByMatching:@"SERVER_CONFIG_FILE=\"(.*?)\"" capture:1L];
+        // exists?
+        if ( ! [[NSFileManager defaultManager] fileExistsAtPath:_apacheConf])
+        {
+            NSLog(@"Error: Apache conf not found at %@", _apacheConf);
+            // clean-up
+            _apacheConf = nil;
+        }
+    }
+}
+
+- (BOOL)apacheIsRunning
+{
+    return [[self runCommand:@"ps -aef | grep httpd"] componentsSeparatedByString:@"\n"].count > 3;
+}
+
+- (BOOL)startApache
+{
+    if ([self sudoRunCommand:@"apachectl start"])
+    {
+        [self startMongoServer];
+        // buuu
+        return YES;
+    }
+    return NO;
+}
+
+- (BOOL)stopApache
+{
+    if ([self sudoRunCommand:@"apachectl stop"])
+    {
+        [self stopMongoServer];
+        // buuu
+        return YES;
+    }
+    return NO;
+}
+
+- (void)restartApache
+{
+    if (self.apacheIsRunning)
+    {
+        [self sudoRunCommand:@"apachectl -k restart"];
+    }
+}
+
+- (IBAction)serverStatusToggle:(NSSegmentedControl *)sender
+{
+    if ((sender.selectedSegment == 0 && self.apacheIsRunning) || (sender.selectedSegment == 1 && ! self.apacheIsRunning)) return;
+    
+    if (sender.selectedSegment == 0)
+    {
+        if ( ! [self startApache])
+        {
+            sender.selectedSegment = 1;
+        }
+    }
+    else // selectedSegment = 1
+    {
+        if ( ! [self stopApache])
+        {
+            sender.selectedSegment = 0;
+        }
+    }
+}
+
+- (IBAction)startApache:(id)sender
+{
+    if ([self startApache])
+    {
+        self.uiServerStatus.selectedSegment = 0;
+    }
+}
+
+- (IBAction)stopApache:(id)sender
+{
+    if ([self stopApache])
+    {
+        self.uiServerStatus.selectedSegment = 1;
+    }
+}
+
+- (IBAction)restartApache:(id)sender
+{
+    [self restartApache];
+}
+
+#pragma mark - MongoDB server
+
+- (BOOL)mongoIsRunning
+{
+    return [[self runCommand:@"ps -aef | grep mongod"] componentsSeparatedByString:@"\n"].count > 3;
+}
+
+- (void)startMongoServer
+{
+    if (_mongoAlreadyRunning) return;
+    // start mongo server
+    [self runCommand:@"ulimit -n 2048 && mongod --config /usr/local/etc/mongod.conf > /dev/null 2>&1 &"];
+}
+
+- (void)stopMongoServer
+{
+    if (_mongoAlreadyRunning) return;
+    // stop mongo server
+    [self runCommand:@"kill `pgrep mongod`"];
+}
+
+#pragma mark - PHP methods
+
+- (void)locateInstalledPHPs
+{
+    NSMutableArray *phps = [NSMutableArray array];
+    // determine installed versions
+    for (NSString *cellar in [[self runCommand:@"brew list"] componentsSeparatedByString:@"\n"])
+    {
+       if ([cellar isMatchedByRegex:@"^php\\d{2}$"])
+       {
+           [phps addObject:cellar];
+       }
+    }
+    // get the list
+    _phpVersions = phps.copy;
+}
+
+- (NSString *)currentPHP
+{
+    NSString *conf = [[NSString alloc] initWithContentsOfFile:_apacheConf encoding:NSUTF8StringEncoding error:nil];
+    // get the current php used in apache
+    return [conf stringByMatching:@"^LoadModule\\s+php\\d_module\\s+.*(php\\d{2}).*$" capture:1L];
+}
+
+- (NSString *)currentPHPCliVersion
+{
+    return [[self runCommand:@"php -v"] stringByMatching:@"PHP ((\\d+)\\.(\\d+)\\.(\\d+))"];
+}
+
+- (NSString *)currentPHPCli
+{
+    NSString *info = [self.currentPHPCliVersion stringByMatching:@"PHP ((\\d+)\\.(\\d+))" capture:1L];
+    return [@"php" stringByAppendingString:[info stringByReplacingOccurrencesOfString:@"." withString:@""]];    
+}
+
+- (void)changePHP
+{
+    // build the apache lib path
+    NSString *php = self.uiPHPs.selectedItem.title;
+    // update apache config if is needed
+    if ( ! [self.currentPHP isEqualToString:php])
+    {
+        NSString *phpSimpleVersion = [php stringByMatching:@"php(\\d)\\d" capture:1L];
+        NSString *lib = [NSString stringWithFormat:@"libexec/apache2/libphp%@.so", phpSimpleVersion];
+        NSString *path = [[[self runCommand:[NSString stringWithFormat:@"brew --prefix %@", php]] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]] stringByAppendingPathComponent:lib];
+        // change php apache config
+        NSString *conf = [[NSString alloc] initWithContentsOfFile:_apacheConf encoding:NSUTF8StringEncoding error:nil];
+        NSString *phpModule = [conf stringByMatching:@"^LoadModule\\s+php\\d_module\\s+.*(php\\d{2}).*$"];
+        conf = [conf stringByReplacingOccurrencesOfString:phpModule withString:[NSString stringWithFormat:@"LoadModule php%@_module %@", phpSimpleVersion, path]];
+        // save changes
+        [conf writeToFile:_apacheConf atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        // restart apache
+        [self restartApache];
+    }
+    // is the CLI checkbox on?
+    if (self.uiChangePHPCli.state == NSControlStateValueOn)
+    {
+        NSString *currentPHPCli = self.currentPHPCli;
+        // php really cahnged?
+        if ( ! [currentPHPCli isEqualToString:php])
+        {
+            [self runCommand:[NSString stringWithFormat:@"brew unlink %@", currentPHPCli]];
+            [self runCommand:[NSString stringWithFormat:@"brew link %@", php]];
+            // update current cli version
+            self.uiCurrentPHPVersion.stringValue = [NSString stringWithFormat:@"(%@)", self.currentPHPCliVersion];
+        }
+    }
+}
+
+- (IBAction)phpChanged:(id)sender
+{
+    [self changePHP];
+}
+
+- (IBAction)phpCliOptionChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool:self.uiChangePHPCli.state == NSControlStateValueOn forKey:@"cli"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+#pragma mark - Document root methods
+
+- (void)saveDocumentRoots
+{
+    [[NSUserDefaults standardUserDefaults] setObject:_documentRoots forKey:@"documentRoots"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)setApacheDocumentRoot:(NSString *)path
+{
+    NSString *conf = [[NSString alloc] initWithContentsOfFile:_apacheConf encoding:NSUTF8StringEncoding error:nil];
+    // modify DocumentRoot directrive
+    conf = [conf stringByReplacingOccurrencesOfRegex:[NSString stringWithFormat:@"DocumentRoot\\s*\"%@\"", _currentDocumentsRoot] withString:[NSString stringWithFormat:@"DocumentRoot \"%@\"", path]];
+    // modify <Directory>
+    conf = [conf stringByReplacingOccurrencesOfRegex:[NSString stringWithFormat:@"<Directory\\s*\"%@\"\\s*>", _currentDocumentsRoot] withString:[NSString stringWithFormat:@"<Directory \"%@\">", path]];
+    // save changes
+    [conf writeToFile:_apacheConf atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    // update the current documents root
+    _currentDocumentsRoot = path;
+}
+
+- (NSString *)currentDocumentRoot
+{
+    NSString *conf = [[NSString alloc] initWithContentsOfFile:_apacheConf encoding:NSUTF8StringEncoding error:nil];
+    // get the current apache config
+    return [conf stringByMatching:@"DocumentRoot\\s*\"(.*?)\"" capture:1L];
+}
+
+- (void)loadDocumentRoots
+{
+	_documentRoots = [NSMutableArray new];
+	BOOL currentDocumentFound = NO;
+	// convert each item to mutable dictionary
+	for (NSDictionary *item in [[NSUserDefaults standardUserDefaults] arrayForKey:@"documentRoots"])
+	{
+		[_documentRoots addObject:[NSMutableDictionary dictionaryWithDictionary:item]];
+		// is the current document root?
+		if ([item[@"path"] isEqualToString:_currentDocumentsRoot]) currentDocumentFound = YES;
+	}
+	// not found?
+	if ( ! currentDocumentFound)
+	{
+		NSMutableDictionary *item = [NSMutableDictionary dictionary];
+		// config item
+		item[@"alias"] = _currentDocumentsRoot.lastPathComponent;
+		item[@"path"] = _currentDocumentsRoot;
+		// add it
+		[_documentRoots addObject:item];
+	}
+}
+
+- (IBAction)addDocumentRoot:(id)sender
+{
+    NSOpenPanel* panel = [NSOpenPanel openPanel];
+    // configure open panel
+    panel.canChooseFiles = NO;
+    panel.canChooseDirectories = YES;
+    panel.canCreateDirectories = YES;
+    panel.allowsMultipleSelection = NO;
+    // display open panel
+    [panel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result)
+    {
+        if (result == NSModalResponseOK)
+        {
+            NSMutableDictionary *item = [NSMutableDictionary dictionary];
+            // config item
+            item[@"alias"] = panel.URLs.firstObject.lastPathComponent;
+            item[@"path"] = panel.URLs.firstObject.path;
+            // add it
+            [_documentRoots addObject:item];
+            // serialize changes
+            [self saveDocumentRoots];
+            // remove it animated
+            [self.uiDocumentRoots beginUpdates];
+            [self.uiDocumentRoots insertRowsAtIndexes:[NSIndexSet indexSetWithIndex:_documentRoots.count - 1] withAnimation:NSTableViewAnimationSlideRight];
+            [self.uiDocumentRoots endUpdates];
+        }
+    }];
+}
+
+- (IBAction)deleteDocumentRoot:(id)sender
+{
+    if (self.uiDocumentRoots.selectedRow != -1)
+    {
+        NSIndexSet *index = [NSIndexSet indexSetWithIndex:self.uiDocumentRoots.selectedRow];
+        // remove it animated
+        [self.uiDocumentRoots beginUpdates];
+        [self.uiDocumentRoots removeRowsAtIndexes:index withAnimation:NSTableViewAnimationSlideLeft];
+        [self.uiDocumentRoots endUpdates];
+        // update data set
+        [_documentRoots removeObjectsAtIndexes:index];
+        // serialize changes
+        [self saveDocumentRoots];
+    }
+}
+
+- (IBAction)selectDocumentRoot:(id)sender
+{
+    NSString *selectedDocumentRool = _documentRoots[self.uiDocumentRoots.clickedRow][@"path"];
+    // is not the current selection?
+    if ( ! [_currentDocumentsRoot isEqualToString:selectedDocumentRool])
+    {
+        [self setApacheDocumentRoot:selectedDocumentRool];
+        // reload table
+        [self.uiDocumentRoots reloadData];
+        // is the server active? then reload it
+        [self restartApache];
+    }
+}
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
+{
+    return _documentRoots.count;
+}
+
+- (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+{
+    NSTableCellView *result = [tableView makeViewWithIdentifier:tableColumn.identifier owner:self];
+    // is the alias cell?
+    if ([tableColumn.identifier isEqualToString:@"alias"])
+    {
+        result.imageView.image = [_currentDocumentsRoot isEqualToString:_documentRoots[row][@"path"]] ? [NSImage imageNamed:@"NSStatusAvailableFlat"] : [NSImage imageNamed:@"NSStatusNoneFlat"];
+    }
+    // configure text
+    result.textField.stringValue = _documentRoots[row][tableColumn.identifier];
+    result.textField.delegate = self;
+    // the view
+    return result;
+}
+
+- (void)controlTextDidEndEditing:(NSNotification *)notification
+{
+    NSInteger row = [self.uiDocumentRoots rowForView:notification.object];
+    NSString *cell = self.uiDocumentRoots.tableColumns[[self.uiDocumentRoots columnForView:notification.object]].identifier;
+    // should restart??
+    BOOL restart = [cell isEqualToString:@"path"] && [_currentDocumentsRoot isEqualToString:_documentRoots[row][@"path"]];
+    // update the documents root
+    _documentRoots[row][cell] = [notification.object stringValue];
+    // serialize changes
+    [self saveDocumentRoots];
+    // should restart?
+    if (restart && ! [_documentRoots[row][cell] isEqualToString:_currentDocumentsRoot])
+    {
+        [self setApacheDocumentRoot:_documentRoots[row][cell]];
+        [self restartApache];
+    }
+}
+
+@end
+
+#pragma mark -
+
+@interface CustomTextFieldCell: NSTableCellView @end
+
+@implementation CustomTextFieldCell
+
+- (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
+{
+    self.textField.textColor = (backgroundStyle == NSBackgroundStyleDark) ? [NSColor whiteColor] : [NSColor textColor];
+    // continue...
+    [super setBackgroundStyle:backgroundStyle];
+}
+
+@end
