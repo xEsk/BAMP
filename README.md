@@ -8,7 +8,10 @@
 The tool assumes that you have installed PHP using Homebrew. 
 
 > Apache and MongoDB are not required to be installed using Homebrew, but I recomend to install them using homebrew.
- 
+
+## Download
+It is free and open source. Download the last version [here](https://github.com/xEsk/BAMP/releases).
+
 ## Why BAMP if there is MAMP, XAMP, etc...?
 I have been using MAMP for years now, but I don't like to wait others to update so I prefere use my own server setup (and I love how homebrew do its job).
 
