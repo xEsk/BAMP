@@ -101,6 +101,15 @@
     return nil;
 }
 
+- (void)openFile:(NSString *)path
+{
+	if ( ! [[NSWorkspace sharedWorkspace] openFile:path])
+	{
+		if ([[NSWorkspace sharedWorkspace] openFile:path withApplication:@"Sublime Text"]) return;
+		if ([[NSWorkspace sharedWorkspace] openFile:path withApplication:@"TextEdit"]) return;
+	}
+}
+
 #pragma mark - Apache methods
 
 - (void)initApacheConfiguration
@@ -194,6 +203,11 @@
     [self restartApache];
 }
 
+- (IBAction)openApacheConf:(id)sender
+{
+	[self openFile:_apacheConf];
+}
+
 #pragma mark - MongoDB server
 
 - (BOOL)mongoIsRunning
@@ -250,6 +264,12 @@
     return [@"php" stringByAppendingString:[info stringByReplacingOccurrencesOfString:@"." withString:@""]];    
 }
 
+- (NSString *)phpINIPath
+{
+	NSString *path = [[self runCommand:[NSString stringWithFormat:@"brew --prefix homebrew/php/%@", self.currentPHP]] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+	return [[self runCommand:[NSString stringWithFormat:@"%@/bin/php -i", path]] stringByMatching:@"Loaded Configuration File => (.*)\n" capture:1L];
+}
+
 - (void)changePHP
 {
     // build the apache lib path
@@ -293,6 +313,11 @@
 {
     [[NSUserDefaults standardUserDefaults] setBool:self.uiChangePHPCli.state == NSControlStateValueOn forKey:@"cli"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (IBAction)openPhpINI:(id)sender
+{
+	[self openFile:self.phpINIPath];
 }
 
 #pragma mark - Document root methods
