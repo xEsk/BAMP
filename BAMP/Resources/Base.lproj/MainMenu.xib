@@ -324,6 +324,25 @@
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="Configs" id="zvu-Kg-wze" userLabel="Configs">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Configs" id="D6o-75-TSY">
+                        <items>
+                            <menuItem title="Edit Apache.conf" keyEquivalent="1" id="V98-SE-Uan">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="openApacheConf:" target="Voe-Tx-rLC" id="WHx-d0-SdM"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Edit php.ini" keyEquivalent="2" id="U1r-v7-mCn">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="openPhpINI:" target="Voe-Tx-rLC" id="ZIk-uA-hKv"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem title="Help" id="wpr-3q-Mcd">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
