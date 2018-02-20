@@ -11,6 +11,8 @@
 #import "NSString+RegEx.h"
 #import "STPrivilegedTask.h"
 
+#define RowInternalPboardType @"RowInternalPboardType"
+
 @interface AppDelegate () <NSTableViewDataSource, NSTextFieldDelegate>
 {
     BOOL _mongoAlreadyRunning;
@@ -50,6 +52,10 @@
     self.uiCurrentPHPVersion.stringValue = [NSString stringWithFormat:@"(%@)", self.currentPHPCliVersion];
 	// load stored documents roots
 	[self loadDocumentRoots];
+	// configure drag and drop
+	[self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationMove forLocal:YES];
+	[self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
+	[self.uiDocumentRoots registerForDraggedTypes:@[RowInternalPboardType]];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
@@ -453,6 +459,37 @@
     result.textField.delegate = self;
     // the view
     return result;
+}
+
+- (BOOL)tableView:(NSTableView *)tableView writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard
+{
+	NSData *data = [NSKeyedArchiver archivedDataWithRootObject:rowIndexes];
+	[pboard declareTypes:[NSArray arrayWithObject:RowInternalPboardType] owner:self];
+	[pboard setData:data forType:RowInternalPboardType];
+	// start dragging
+	return YES;
+}
+
+- (NSDragOperation)tableView:(NSTableView *)tableView validateDrop:(id<NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)dropOperation
+{
+	return NSDragOperationEvery;
+}
+
+- (BOOL)tableView:(NSTableView *)tableView acceptDrop:(id<NSDraggingInfo>)info row:(NSInteger)destinationRow dropOperation:(NSTableViewDropOperation)dropOperation
+{
+	NSIndexSet *index = [NSKeyedUnarchiver unarchiveObjectWithData:[info.draggingPasteboard dataForType:RowInternalPboardType]];
+	// prevent out of index
+	if (destinationRow == _documentRoots.count) destinationRow -= 1;
+	// move items
+	NSMutableDictionary *original = _documentRoots[index.firstIndex];
+	[_documentRoots removeObject:original];
+	[_documentRoots insertObject:original atIndex:destinationRow];
+	// serialize changes
+	[self saveDocumentRoots];
+	// reload table
+	[self.uiDocumentRoots reloadData];
+	// ok
+	return YES;
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)notification
