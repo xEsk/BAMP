@@ -430,6 +430,11 @@
     }
 }
 
+- (IBAction)openFolder:(NSButton *)sender
+{
+	[[NSWorkspace sharedWorkspace] openFile:_documentRoots[[self.uiDocumentRoots rowForView:sender.superview]][@"path"]];
+}
+
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
     return _documentRoots.count;

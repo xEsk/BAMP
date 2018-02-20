@@ -358,8 +358,8 @@
             </items>
             <point key="canvasLocation" x="-208" y="-567"/>
         </menu>
-        <window title="BAMP" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" id="QvC-M9-y7g">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+        <window title="BAMP" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" animationBehavior="default" titlebarAppearsTransparent="YES" id="QvC-M9-y7g">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
             <rect key="contentRect" x="335" y="390" width="500" height="420"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <value key="minSize" type="size" width="500" height="400"/>
@@ -372,7 +372,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="FJF-7z-SmZ">
-                                <rect key="frame" x="52" y="382" width="44" height="17"/>
+                                <rect key="frame" x="52" y="365" width="44" height="17"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Server" id="JSn-MX-Qke">
                                     <font key="font" metaFont="system"/>
@@ -381,7 +381,7 @@
                                 </textFieldCell>
                             </textField>
                             <segmentedControl verticalHuggingPriority="750" misplaced="YES" id="jRh-sc-etf">
-                                <rect key="frame" x="100" y="378" width="99" height="24"/>
+                                <rect key="frame" x="100" y="361" width="99" height="24"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <segmentedCell key="cell" borderStyle="border" alignment="left" style="rounded" trackingMode="selectOne" id="Xig-ci-uxM">
                                     <font key="font" metaFont="system"/>
@@ -394,8 +394,19 @@
                                     <action selector="serverStatusToggle:" target="Voe-Tx-rLC" id="ITb-dK-wDw"/>
                                 </connections>
                             </segmentedControl>
+                            <button verticalHuggingPriority="750" misplaced="YES" id="WXt-Tb-Oky">
+                                <rect key="frame" x="205" y="362" width="22" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSActionTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="H8i-lU-nLg">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="openApacheConf:" target="Voe-Tx-rLC" id="bHA-LF-cMw"/>
+                                </connections>
+                            </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="eqK-68-lyj">
-                                <rect key="frame" x="18" y="346" width="78" height="17"/>
+                                <rect key="frame" x="18" y="329" width="78" height="17"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="PHP version" id="fkL-NZ-lUG">
                                     <font key="font" metaFont="system"/>
@@ -404,7 +415,7 @@
                                 </textFieldCell>
                             </textField>
                             <popUpButton verticalHuggingPriority="750" misplaced="YES" id="Zor-K5-7jr">
-                                <rect key="frame" x="100" y="341" width="234" height="26"/>
+                                <rect key="frame" x="100" y="324" width="234" height="26"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <popUpButtonCell key="cell" type="push" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" id="U26-UN-7zd">
                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -415,8 +426,19 @@
                                     <action selector="phpChanged:" target="Voe-Tx-rLC" id="HAA-ab-aDa"/>
                                 </connections>
                             </popUpButton>
+                            <button verticalHuggingPriority="750" misplaced="YES" id="HQF-oX-bv4">
+                                <rect key="frame" x="339" y="327" width="22" height="22"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSActionTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wR2-t3-jc1">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="openPhpINI:" target="Voe-Tx-rLC" id="5wH-Ht-Pbv"/>
+                                </connections>
+                            </button>
                             <button verticalHuggingPriority="750" misplaced="YES" id="o4L-8M-hzf">
-                                <rect key="frame" x="99" y="320" width="234" height="20"/>
+                                <rect key="frame" x="99" y="303" width="234" height="20"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="check" title="Configure also as default system PHP cli" bezelStyle="regularSquare" imagePosition="left" controlSize="small" state="on" inset="2" id="2Dy-dd-dR7">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -427,7 +449,7 @@
                                 </connections>
                             </button>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="efU-b9-2Nv">
-                                <rect key="frame" x="336" y="323" width="140" height="14"/>
+                                <rect key="frame" x="336" y="306" width="140" height="14"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="Ker-uP-r7s">
                                     <font key="font" metaFont="smallSystem"/>
@@ -436,11 +458,11 @@
                                 </textFieldCell>
                             </textField>
                             <box verticalHuggingPriority="750" misplaced="YES" boxType="separator" id="j0M-fl-UG9">
-                                <rect key="frame" x="0.0" y="302" width="501" height="5"/>
+                                <rect key="frame" x="0.0" y="285" width="501" height="5"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                             </box>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" misplaced="YES" id="SUp-qs-PMO">
-                                <rect key="frame" x="18" y="269" width="228" height="17"/>
+                                <rect key="frame" x="18" y="254" width="228" height="17"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Configure your document root paths:" id="gJv-ap-9Rt">
                                     <font key="font" metaFont="system"/>
@@ -449,7 +471,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" misplaced="YES" id="1kQ-7h-eYR">
-                                <rect key="frame" x="446" y="266" width="22" height="22"/>
+                                <rect key="frame" x="448" y="251" width="22" height="22"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="j3S-7f-7lc">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -460,7 +482,7 @@
                                 </connections>
                             </button>
                             <button verticalHuggingPriority="750" misplaced="YES" id="hfs-Mf-uWC">
-                                <rect key="frame" x="467" y="266" width="22" height="22"/>
+                                <rect key="frame" x="469" y="251" width="22" height="22"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="e0W-2V-vjB">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -471,14 +493,14 @@
                                 </connections>
                             </button>
                             <scrollView misplaced="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="20" horizontalPageScroll="10" verticalLineScroll="20" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="J11-NC-hgV">
-                                <rect key="frame" x="0.0" y="0.0" width="501" height="259"/>
+                                <rect key="frame" x="0.0" y="0.0" width="501" height="242"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <clipView key="contentView" id="ZOj-ha-RiZ">
-                                    <rect key="frame" x="0.0" y="0.0" width="501" height="259"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="501" height="242"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowHeight="20" headerView="8qK-Kw-IQi" viewBased="YES" id="gmR-Qm-Q8V">
-                                            <rect key="frame" x="0.0" y="0.0" width="501" height="236"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="501" height="219"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -540,8 +562,8 @@
                                                             <rect key="frame" x="156" y="0.0" width="343" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="Hue-oK-KLp">
-                                                                    <rect key="frame" x="2" y="0.0" width="339" height="17"/>
+                                                                <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" misplaced="YES" id="Hue-oK-KLp">
+                                                                    <rect key="frame" x="2" y="0.0" width="320" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" title="Table View Cell" drawsBackground="YES" id="l8b-KS-5zP">
                                                                         <font key="font" metaFont="system"/>
@@ -549,6 +571,17 @@
                                                                         <color key="backgroundColor" white="1" alpha="0.0" colorSpace="deviceWhite"/>
                                                                     </textFieldCell>
                                                                 </textField>
+                                                                <button verticalHuggingPriority="750" misplaced="YES" id="Egr-mF-pia">
+                                                                    <rect key="frame" x="324" y="0.0" width="16" height="17"/>
+                                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                                                    <buttonCell key="cell" type="bevel" bezelStyle="regularSquare" image="NSFollowLinkFreestandingTemplate" imagePosition="only" lineBreakMode="truncatingTail" state="on" borderStyle="border" transparent="YES" inset="2" id="h0I-Pd-bRH">
+                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                        <font key="font" metaFont="system"/>
+                                                                        <connections>
+                                                                            <action selector="openFolder:" target="Voe-Tx-rLC" id="zXo-am-ca2"/>
+                                                                        </connections>
+                                                                    </buttonCell>
+                                                                </button>
                                                             </subviews>
                                                             <connections>
                                                                 <outlet property="textField" destination="Hue-oK-KLp" id="Hsx-XI-CpF"/>
@@ -578,28 +611,6 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableHeaderView>
                             </scrollView>
-                            <button verticalHuggingPriority="750" misplaced="YES" id="HQF-oX-bv4">
-                                <rect key="frame" x="339" y="344" width="22" height="22"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSActionTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wR2-t3-jc1">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="openPhpINI:" target="Voe-Tx-rLC" id="5wH-Ht-Pbv"/>
-                                </connections>
-                            </button>
-                            <button verticalHuggingPriority="750" misplaced="YES" id="WXt-Tb-Oky">
-                                <rect key="frame" x="205" y="380" width="22" height="22"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSActionTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="H8i-lU-nLg">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                                <connections>
-                                    <action selector="openApacheConf:" target="Voe-Tx-rLC" id="bHA-LF-cMw"/>
-                                </connections>
-                            </button>
                         </subviews>
                     </visualEffectView>
                 </subviews>
@@ -610,6 +621,7 @@
     <resources>
         <image name="NSActionTemplate" width="14" height="14"/>
         <image name="NSAddTemplate" width="11" height="11"/>
+        <image name="NSFollowLinkFreestandingTemplate" width="14" height="14"/>
         <image name="NSRemoveTemplate" width="11" height="11"/>
     </resources>
 </document>
