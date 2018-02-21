@@ -1,7 +1,9 @@
 #1.2
-- Added open folder option
-- Added the possibility to sort your documents roots
-- Changed the main window style
+- Added open folder option in Documents Roots.
+- Added the possibility to sort (manually and automatically) your Documents Roots.
+- Added the possibility to drop folders/files from Finder in Documents Roots.
+- Changed the main window style.
+- Fixed bug which was causing a crash when double-clicking on a column with no item selected.
 
 ---
 
