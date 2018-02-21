@@ -55,7 +55,7 @@
 	// configure drag and drop
 	[self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationMove forLocal:YES];
 	[self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
-	[self.uiDocumentRoots registerForDraggedTypes:@[RowInternalPboardType]];
+	[self.uiDocumentRoots registerForDraggedTypes:@[RowInternalPboardType, NSFilenamesPboardType]];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
@@ -377,7 +377,23 @@
 	}
 }
 
-- (IBAction)addDocumentRoot:(id)sender
+- (void)addDocumentRoot:(NSURL *)url index:(NSInteger)index
+{
+	NSMutableDictionary *item = [NSMutableDictionary dictionary];
+	// config item
+	item[@"alias"] = url.lastPathComponent;
+	item[@"path"] = url.path;
+	// add it
+	[_documentRoots insertObject:item atIndex:index];
+	// serialize changes
+	[self saveDocumentRoots];
+	// insert it animated
+	[self.uiDocumentRoots beginUpdates];
+	[self.uiDocumentRoots insertRowsAtIndexes:[NSIndexSet indexSetWithIndex:index] withAnimation:NSTableViewAnimationSlideRight];
+	[self.uiDocumentRoots endUpdates];
+}
+
+- (IBAction)addDocumentRootAction:(id)sender
 {
     NSOpenPanel* panel = [NSOpenPanel openPanel];
     // configure open panel
@@ -390,18 +406,7 @@
     {
         if (result == NSModalResponseOK)
         {
-            NSMutableDictionary *item = [NSMutableDictionary dictionary];
-            // config item
-            item[@"alias"] = panel.URLs.firstObject.lastPathComponent;
-            item[@"path"] = panel.URLs.firstObject.path;
-            // add it
-            [_documentRoots addObject:item];
-            // serialize changes
-            [self saveDocumentRoots];
-            // remove it animated
-            [self.uiDocumentRoots beginUpdates];
-            [self.uiDocumentRoots insertRowsAtIndexes:[NSIndexSet indexSetWithIndex:_documentRoots.count - 1] withAnimation:NSTableViewAnimationSlideRight];
-            [self.uiDocumentRoots endUpdates];
+			[self addDocumentRoot:panel.URLs.firstObject index:_documentRoots.count];
         }
     }];
 }
@@ -424,16 +429,19 @@
 
 - (IBAction)selectDocumentRoot:(id)sender
 {
-    NSString *selectedDocumentRool = _documentRoots[self.uiDocumentRoots.clickedRow][@"path"];
-    // is not the current selection?
-    if ( ! [_currentDocumentsRoot isEqualToString:selectedDocumentRool])
-    {
-        [self setApacheDocumentRoot:selectedDocumentRool];
-        // reload table
-        [self.uiDocumentRoots reloadData];
-        // is the server active? then reload it
-        [self restartApache];
-    }
+	if (self.uiDocumentRoots.clickedRow != -1)
+	{
+		NSString *selectedDocumentRool = _documentRoots[self.uiDocumentRoots.clickedRow][@"path"];
+		// is not the current selection?
+		if ( ! [_currentDocumentsRoot isEqualToString:selectedDocumentRool])
+		{
+			[self setApacheDocumentRoot:selectedDocumentRool];
+			// reload table
+			[self.uiDocumentRoots reloadData];
+			// is the server active? then reload it
+			[self restartApache];
+		}
+	}
 }
 
 - (IBAction)openFolder:(NSButton *)sender
@@ -464,7 +472,7 @@
 - (BOOL)tableView:(NSTableView *)tableView writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard
 {
 	NSData *data = [NSKeyedArchiver archivedDataWithRootObject:rowIndexes];
-	[pboard declareTypes:[NSArray arrayWithObject:RowInternalPboardType] owner:self];
+	[pboard declareTypes:@[RowInternalPboardType] owner:self];
 	[pboard setData:data forType:RowInternalPboardType];
 	// start dragging
 	return YES;
@@ -472,24 +480,65 @@
 
 - (NSDragOperation)tableView:(NSTableView *)tableView validateDrop:(id<NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)dropOperation
 {
-	return NSDragOperationEvery;
+	NSPasteboard* pboard = info.draggingPasteboard;
+	// is a valid drop?
+	if ([pboard.types containsObject:RowInternalPboardType] || [pboard.types containsObject:NSFilenamesPboardType])
+	{
+		return NSDragOperationEvery;
+	}
+	return NSDragOperationNone;
 }
 
 - (BOOL)tableView:(NSTableView *)tableView acceptDrop:(id<NSDraggingInfo>)info row:(NSInteger)destinationRow dropOperation:(NSTableViewDropOperation)dropOperation
 {
-	NSIndexSet *index = [NSKeyedUnarchiver unarchiveObjectWithData:[info.draggingPasteboard dataForType:RowInternalPboardType]];
-	// prevent out of index
-	if (destinationRow == _documentRoots.count) destinationRow -= 1;
-	// move items
-	NSMutableDictionary *original = _documentRoots[index.firstIndex];
-	[_documentRoots removeObject:original];
-	[_documentRoots insertObject:original atIndex:destinationRow];
+	NSPasteboard* pboard = info.draggingPasteboard;
+	// is an internal drag and drop?
+	if ([pboard.types containsObject:RowInternalPboardType])
+	{
+		NSIndexSet *index = [NSKeyedUnarchiver unarchiveObjectWithData:[info.draggingPasteboard dataForType:RowInternalPboardType]];
+		// prevent out of index
+		if (destinationRow == _documentRoots.count) destinationRow -= 1;
+		// move items
+		NSMutableDictionary *original = _documentRoots[index.firstIndex];
+		[_documentRoots removeObject:original];
+		[_documentRoots insertObject:original atIndex:destinationRow];
+		// serialize changes
+		[self saveDocumentRoots];
+		// reload table
+		[self.uiDocumentRoots reloadData];
+		// ok
+		return YES;
+	}
+	// is a Finder drag and drop?
+	else if ([pboard.types containsObject:NSFilenamesPboardType])
+	{
+		for (NSString *path in [pboard propertyListForType:NSFilenamesPboardType])
+		{
+			BOOL isDir;
+			NSURL *url = [NSURL fileURLWithPath:path];
+			// get information from this path
+			[[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir];
+			// is a file? then get his parent directory
+			if ( ! isDir)
+			{
+				NSMutableArray *parts = url.pathComponents.mutableCopy;
+				[parts removeLastObject];
+				url = [NSURL URLWithString:[parts componentsJoinedByString:@"/"]];
+			}
+			// add element
+			[self addDocumentRoot:url index:destinationRow];
+		}
+	}
+	return NO;
+}
+
+- (void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
+{
+	[_documentRoots sortUsingDescriptors:[tableView sortDescriptors]];
 	// serialize changes
 	[self saveDocumentRoots];
-	// reload table
-	[self.uiDocumentRoots reloadData];
-	// ok
-	return YES;
+	// update table
+	[tableView reloadData];
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)notification
