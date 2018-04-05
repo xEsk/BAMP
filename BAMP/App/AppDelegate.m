@@ -19,7 +19,7 @@
     
     NSString *_apacheConf;
     NSString *_currentDocumentsRoot;
-    NSArray<NSString *> *_phpVersions;
+	NSDictionary *_phpVersions;
     
     NSMutableArray<NSMutableDictionary *> *_documentRoots;
 }
@@ -46,7 +46,7 @@
     _currentDocumentsRoot = self.currentDocumentRoot;
     // configure UI
     [self.uiServerStatus setSelected:YES forSegment:self.apacheIsRunning ? 0 : 1];
-    [self.uiPHPs addItemsWithTitles:_phpVersions];
+    [self.uiPHPs addItemsWithTitles:_phpVersions.allKeys];
     [self.uiPHPs selectItemWithTitle:self.currentPHP];
     self.uiChangePHPCli.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"cli"] ? NSControlStateValueOn : NSControlStateValueOff;
     self.uiCurrentPHPVersion.stringValue = [NSString stringWithFormat:@"(%@)", self.currentPHPCliVersion];
@@ -239,13 +239,19 @@
 
 - (void)locateInstalledPHPs
 {
-    NSMutableArray *phps = [NSMutableArray array];
+	NSMutableDictionary *phps = [NSMutableDictionary dictionary];
     // determine installed versions
     for (NSString *cellar in [[self runCommand:@"brew list"] componentsSeparatedByString:@"\n"])
     {
-       if ([cellar isMatchedByRegex:@"^php\\d{2}$"])
+       if ([cellar isEqualToString:@"php"] || [cellar isMatchedByRegex:@"^php@\\d\\.\\d$"])
        {
-           [phps addObject:cellar];
+		   for (NSString *fileName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[@"/usr/local/Cellar/" stringByAppendingString:cellar] error:nil])
+		   {
+			   if ([fileName isMatchedByRegex:@"^\\d\\d?\\."])
+			   {
+				   [phps setObject:cellar forKey:fileName];
+			   }
+		   }
        }
     }
     // get the list
@@ -256,7 +262,7 @@
 {
     NSString *conf = [[NSString alloc] initWithContentsOfFile:_apacheConf encoding:NSUTF8StringEncoding error:nil];
     // get the current php used in apache
-    return [conf stringByMatching:@"^LoadModule\\s+php\\d_module\\s+.*(php\\d{2}).*$" capture:1L];
+    return [conf stringByMatching:@"^LoadModule\\s+php\\d_module\\s+.*\\/usr\\/local\\/Cellar\\/(.*?)\\/(.*?)\\/" capture:2L];
 }
 
 - (NSString *)currentPHPCliVersion
@@ -266,13 +272,13 @@
 
 - (NSString *)currentPHPCli
 {
-    NSString *info = [self.currentPHPCliVersion stringByMatching:@"PHP ((\\d+)\\.(\\d+))" capture:1L];
-    return [@"php" stringByAppendingString:[info stringByReplacingOccurrencesOfString:@"." withString:@""]];    
+	return [self.currentPHPCliVersion stringByReplacingOccurrencesOfString:@"PHP " withString:@""];
 }
 
 - (NSString *)phpINIPath
 {
-	NSString *path = [[self runCommand:[NSString stringWithFormat:@"brew --prefix homebrew/php/%@", self.currentPHP]] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+	NSString *cellar = _phpVersions[self.currentPHP];
+	NSString *path = [[self runCommand:[NSString stringWithFormat:@"brew --prefix %@", cellar]] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
 	return [[self runCommand:[NSString stringWithFormat:@"%@/bin/php -i", path]] stringByMatching:@"Loaded Configuration File => (.*)\n" capture:1L];
 }
 
@@ -283,13 +289,12 @@
     // update apache config if is needed
     if ( ! [self.currentPHP isEqualToString:php])
     {
-        NSString *phpSimpleVersion = [php stringByMatching:@"php(\\d)\\d" capture:1L];
-        NSString *lib = [NSString stringWithFormat:@"libexec/apache2/libphp%@.so", phpSimpleVersion];
-        NSString *path = [[[self runCommand:[NSString stringWithFormat:@"brew --prefix %@", php]] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]] stringByAppendingPathComponent:lib];
-        // change php apache config
+		NSString *singleVersion = [php stringByMatching:@"(\\d\\d?)\\." capture:1L];
+		NSString *path = [NSString stringWithFormat:@"/usr/local/Cellar/%@/%@/lib/httpd/modules/libphp%@.so", _phpVersions[php], php, singleVersion];
+		// change php apache config
         NSString *conf = [[NSString alloc] initWithContentsOfFile:_apacheConf encoding:NSUTF8StringEncoding error:nil];
-        NSString *phpModule = [conf stringByMatching:@"^LoadModule\\s+php\\d_module\\s+.*(php\\d{2}).*$"];
-        conf = [conf stringByReplacingOccurrencesOfString:phpModule withString:[NSString stringWithFormat:@"LoadModule php%@_module %@", phpSimpleVersion, path]];
+        NSString *phpModule = [conf stringByMatching:@"^LoadModule\\s+php\\d_module\\s+.*"];
+        conf = [conf stringByReplacingOccurrencesOfString:phpModule withString:[NSString stringWithFormat:@"LoadModule php%@_module %@", singleVersion, path]];
         // save changes
         [conf writeToFile:_apacheConf atomically:YES encoding:NSUTF8StringEncoding error:nil];
         // restart apache
@@ -302,8 +307,9 @@
         // php really cahnged?
         if ( ! [currentPHPCli isEqualToString:php])
         {
-            [self runCommand:[NSString stringWithFormat:@"brew unlink %@", currentPHPCli]];
-            [self runCommand:[NSString stringWithFormat:@"brew link %@", php]];
+			[self runCommand:[NSString stringWithFormat:@"brew unlink %@", _phpVersions[currentPHPCli]]];
+			[self runCommand:[NSString stringWithFormat:@"brew switch %@ %@", _phpVersions[php], php]];
+			[self runCommand:[NSString stringWithFormat:@"brew link --force %@", _phpVersions[php]]];
             // update current cli version
             self.uiCurrentPHPVersion.stringValue = [NSString stringWithFormat:@"(%@)", self.currentPHPCliVersion];
         }
