@@ -46,7 +46,7 @@
     _currentDocumentsRoot = self.currentDocumentRoot;
     // configure UI
     [self.uiServerStatus setSelected:YES forSegment:self.apacheIsRunning ? 0 : 1];
-    [self.uiPHPs addItemsWithTitles:_phpVersions.allKeys];
+    [self.uiPHPs addItemsWithTitles:[_phpVersions.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]];
     [self.uiPHPs selectItemWithTitle:self.currentPHP];
     self.uiChangePHPCli.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"cli"] ? NSControlStateValueOn : NSControlStateValueOff;
     self.uiCurrentPHPVersion.stringValue = [NSString stringWithFormat:@"(%@)", self.currentPHPCliVersion];
