@@ -84,8 +84,16 @@
     [task setStandardError:outPipe];
     // run the command
     [task launch];
+	// get the output
+	NSString *output = [[NSString alloc] initWithData:[[outPipe fileHandleForReading] readDataToEndOfFile] encoding:NSUTF8StringEncoding];
+#ifdef DEBUG
+	NSLog(@"> %@", commandToRun);
+	NSLog(@"-----------------");
+	NSLog(@"%@", output);
+	NSLog(@"=================");
+#endif
     // capture output
-    return [[NSString alloc] initWithData:[[outPipe fileHandleForReading] readDataToEndOfFile] encoding:NSUTF8StringEncoding];
+	return output;
 }
 
 - (NSString *)sudoRunCommand:(NSString *)commandToRun
@@ -101,8 +109,16 @@
     {
         // wait task to finish...
         [task waitUntilExit];
+		// get the output
+		NSString *output = [[NSString alloc] initWithData:[[task outputFileHandle] readDataToEndOfFile] encoding:NSUTF8StringEncoding];
+#ifdef DEBUG
+		NSLog(@"[SUDO] > %@", commandToRun);
+		NSLog(@"-----------------");
+		NSLog(@"%@", output);
+		NSLog(@"=================");
+#endif
         // capture output
-        return [[NSString alloc] initWithData:[[task outputFileHandle] readDataToEndOfFile] encoding:NSUTF8StringEncoding];
+		return output;
     }
     return nil;
 }
