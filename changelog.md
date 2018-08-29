@@ -1,3 +1,9 @@
+#1.4
+- Added PHP Warnings detection
+- Fixed bug when switching between PHP Cli versions when the current PHP version has a sub-build version (example: 7.2.9_2)
+
+---
+
 #1.3
 - Added possibility to manage multiple versions of same php main version.
 - Implemented support to the new homebrew php [information here](https://github.com/Homebrew/homebrew-php/issues/4721).
