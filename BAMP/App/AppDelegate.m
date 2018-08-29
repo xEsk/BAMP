@@ -282,6 +282,12 @@
 	return [[self runCommand:[NSString stringWithFormat:@"%@/bin/php -i", path]] stringByMatching:@"Loaded Configuration File => (.*)\n" capture:1L];
 }
 
+- (NSString *)resolveRealBrewPHPCliVersion
+{
+	NSString *path = [self runCommand:[NSString stringWithFormat:@"readlink %@", [self runCommand:@"which php"]]];
+	return [path stringByMatching:@"\\/php(@\\d\\.\\d)?\\/(.+?)\\/" capture:2L];
+}
+
 - (void)changePHP
 {
     // build the apache lib path
@@ -307,7 +313,7 @@
         // php really cahnged?
         if ( ! [currentPHPCli isEqualToString:php])
         {
-			[self runCommand:[NSString stringWithFormat:@"brew unlink %@", _phpVersions[currentPHPCli]]];
+			[self runCommand:[NSString stringWithFormat:@"brew unlink %@", _phpVersions[[self resolveRealBrewPHPCliVersion]]]];
 			[self runCommand:[NSString stringWithFormat:@"brew switch %@ %@", _phpVersions[php], php]];
 			[self runCommand:[NSString stringWithFormat:@"brew link --force %@", _phpVersions[php]]];
             // update current cli version
