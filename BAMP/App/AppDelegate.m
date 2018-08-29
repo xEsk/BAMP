@@ -56,6 +56,8 @@
 	[self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationMove forLocal:YES];
 	[self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
 	[self.uiDocumentRoots registerForDraggedTypes:@[RowInternalPboardType, NSFilenamesPboardType]];
+	// show the potential php warnings
+	[self parsePHPWarnings];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
@@ -321,6 +323,8 @@
         [conf writeToFile:_apacheConf atomically:YES encoding:NSUTF8StringEncoding error:nil];
         // restart apache
         [self restartApache];
+		// capture possible warnings
+		[self parsePHPWarnings];
     }
     // is the CLI checkbox on?
     if (self.uiChangePHPCli.state == NSControlStateValueOn)
@@ -352,6 +356,24 @@
 - (IBAction)openPhpINI:(id)sender
 {
 	[self openFile:self.phpINIPath];
+}
+
+- (void)parsePHPWarnings
+{
+	NSString *currentPHP = self.currentPHP;
+	// capture the php cli outputs
+	NSString *output = [self runCommand:[NSString stringWithFormat:@"/usr/local/Cellar/%@/%@/bin/php -v", _phpVersions[currentPHP], currentPHP]];
+	// capture warnings
+	NSArray *warnings = [output componentsMatchedByRegex:@"PHP Warning:(.*)(?:(?:\\r\\n|[\\r\\n])[^\\r\\n]+)*"];
+	// there are some warnings?
+	if (warnings.count > 0)
+	{
+		NSAlert *alert = [[NSAlert alloc] init];
+		[alert setMessageText:[NSString stringWithFormat:@"PHP %@ (%ld PHP Warnings found)", [self currentPHP], warnings.count]];
+		[alert setInformativeText:[warnings componentsJoinedByString:@"\n\n"]];
+		[alert addButtonWithTitle:@"Continue"];
+		[alert runModal];
+	}
 }
 
 #pragma mark - Document root methods
