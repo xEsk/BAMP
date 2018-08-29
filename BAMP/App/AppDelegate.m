@@ -369,7 +369,7 @@
 	if (warnings.count > 0)
 	{
 		NSAlert *alert = [[NSAlert alloc] init];
-		[alert setMessageText:[NSString stringWithFormat:@"PHP %@ (%ld PHP Warnings found)", [self currentPHP], warnings.count]];
+		[alert setMessageText:[NSString stringWithFormat:@"PHP %@ (%ld warnings found)", [self currentPHP], warnings.count]];
 		[alert setInformativeText:[warnings componentsJoinedByString:@"\n\n"]];
 		[alert addButtonWithTitle:@"Continue"];
 		[alert runModal];
