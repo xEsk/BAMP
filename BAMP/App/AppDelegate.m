@@ -456,7 +456,7 @@
     {
         if (result == NSModalResponseOK)
         {
-			[self addDocumentRoot:panel.URLs.firstObject index:_documentRoots.count];
+			[self addDocumentRoot:panel.URLs.firstObject index:self->_documentRoots.count];
         }
     }];
 }
