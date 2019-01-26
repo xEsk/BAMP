@@ -151,6 +151,20 @@
     }
 }
 
+- (BOOL)validateApacheConf:(NSString **)error
+{
+    NSString *result = [self runCommand:@"apachectl configtest"];
+    // has errors?
+    if ( ! [result stringByMatching:@"Syntax OK"])
+    {
+        *error = result;
+        // ops!
+        return NO;
+    }
+    // all is ok
+    return YES;
+}
+
 - (BOOL)apacheIsRunning
 {
     return [[self runCommand:@"ps -aef | grep httpd"] componentsSeparatedByString:@"\n"].count > 3;
@@ -158,11 +172,36 @@
 
 - (BOOL)startApache
 {
-    if ([self sudoRunCommand:@"apachectl start"])
+    NSString *error = nil;
+    // validate the apache config before start server
+    if ([self validateApacheConf:&error])
     {
-        [self startMongoServer];
-        // buuu
-        return YES;
+        // try to start server
+        if ([self sudoRunCommand:@"apachectl start"])
+        {
+            // start the mongo server
+            [self startMongoServer];
+            // buuu
+            return YES;
+        }
+    }
+    else // error!
+    {
+        __block NSString *message = @"";
+        // parse errors
+        [[error componentsSeparatedByString:@"\n"] enumerateObjectsUsingBlock:^(NSString *line, NSUInteger idx, BOOL *stop)
+        {
+            if ( ! [line isMatchedByRegex:@"^\\d{4}-\\d{2}-\\d{2}\\s"])
+            {
+                message = [message stringByAppendingString:[line stringByAppendingString:@"\n"]];
+            }
+        }];
+        // display error
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Invalid Apache configuration"];
+        [alert setInformativeText:message];
+        [alert addButtonWithTitle:@"Continue"];
+        [alert runModal];
     }
     return NO;
 }
