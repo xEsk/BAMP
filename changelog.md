@@ -1,3 +1,6 @@
+#1.5
+- Added Apache configuration validation before start the service
+
 #1.4
 - Added PHP Warnings detection
 - Fixed bug when switching between PHP Cli versions when the current PHP version has a sub-build version (example: 7.2.9_2)
