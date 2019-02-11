@@ -450,9 +450,12 @@
 	// convert each item to mutable dictionary
 	for (NSDictionary *item in [[NSUserDefaults standardUserDefaults] arrayForKey:@"documentRoots"])
 	{
-		[_documentRoots addObject:[NSMutableDictionary dictionaryWithDictionary:item]];
-		// is the current document root?
-		if ([item[@"path"] isEqualToString:_currentDocumentsRoot]) currentDocumentFound = YES;
+        if (item[@"path"])
+        {
+            [_documentRoots addObject:[NSMutableDictionary dictionaryWithDictionary:item]];
+            // is the current document root?
+            if ([item[@"path"] isEqualToString:_currentDocumentsRoot]) currentDocumentFound = YES;
+        }
 	}
 	// not found?
 	if ( ! currentDocumentFound)
