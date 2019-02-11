@@ -1,5 +1,12 @@
+#1.6
+- UI improvements (the position, size and columns are now saved and restored)
+
+---
+
 #1.5
 - Added Apache configuration validation before start the service
+
+---
 
 #1.4
 - Added PHP Warnings detection
