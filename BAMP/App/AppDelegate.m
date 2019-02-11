@@ -37,27 +37,37 @@
 
 @implementation AppDelegate
 
+- (instancetype)init
+{
+    if (self = [super init])
+    {
+        // init configurations
+        [self initApacheConfiguration];
+        // somoe inits
+        _mongoAlreadyRunning = self.mongoIsRunning;
+        _currentDocumentsRoot = self.currentDocumentRoot;
+        // load stored documents roots
+        [self loadDocumentRoots];
+    }
+    return self;
+}
+
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
 {
-    // init configurations
-    [self initApacheConfiguration];
+    // init php
     [self locateInstalledPHPs];
-    _mongoAlreadyRunning = self.mongoIsRunning;
-    _currentDocumentsRoot = self.currentDocumentRoot;
     // configure UI
     [self.uiServerStatus setSelected:YES forSegment:self.apacheIsRunning ? 0 : 1];
     [self.uiPHPs addItemsWithTitles:[_phpVersions.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]];
     [self.uiPHPs selectItemWithTitle:self.currentPHP];
     self.uiChangePHPCli.state = [[NSUserDefaults standardUserDefaults] boolForKey:@"cli"] ? NSControlStateValueOn : NSControlStateValueOff;
     self.uiCurrentPHPVersion.stringValue = [NSString stringWithFormat:@"(%@)", self.currentPHPCliVersion];
-	// load stored documents roots
-	[self loadDocumentRoots];
-	// configure drag and drop
-	[self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationMove forLocal:YES];
-	[self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
-	[self.uiDocumentRoots registerForDraggedTypes:@[RowInternalPboardType, NSFilenamesPboardType]];
-	// show the potential php warnings
-	[self parsePHPWarnings];
+    // configure drag and drop
+    [self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationMove forLocal:YES];
+    [self.uiDocumentRoots setDraggingSourceOperationMask:NSDragOperationCopy forLocal:NO];
+    [self.uiDocumentRoots registerForDraggedTypes:@[RowInternalPboardType, NSFilenamesPboardType]];
+    // show the potential php warnings
+    [self parsePHPWarnings];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
@@ -626,6 +636,7 @@
 
 - (void)tableView:(NSTableView *)tableView sortDescriptorsDidChange:(NSArray *)oldDescriptors
 {
+    // apply sort
 	[_documentRoots sortUsingDescriptors:[tableView sortDescriptors]];
 	// serialize changes
 	[self saveDocumentRoots];
