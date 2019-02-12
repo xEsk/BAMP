@@ -1,3 +1,8 @@
+#1.7
+- Added automatic updates (using the Sparkle Framework)
+
+---
+
 #1.6
 - UI improvements (the position, size and columns are now saved and restored)
 
