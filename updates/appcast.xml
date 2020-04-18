@@ -5,6 +5,6 @@
 <title>1.7</title>
 <pubDate>mar, 12 feb 2019 12:49:01 +0100</pubDate>
 <sparkle:minimumSystemVersion>10.11</sparkle:minimumSystemVersion>
-<enclosure url="https://raw.githubusercontent.com/xEsk/BAMP/master/updates/BAMP%201.7.dmg" sparkle:version="1.7.0" sparkle:shortVersionString="1.7" length="1179525" type="application/octet-stream" sparkle:edSignature="BZ0MchCAc6oTVWzYlPwp7fY1mUIw1nSJrexztLzEudK0jSkaSIfSVgrBCM/18v2ZeXTyzYLMvg5i4PFgiVcaCw=="/>
+<enclosure url="https://github.com/xEsk/BAMP/releases/download/1.7/BAMP.1.7.dmg" sparkle:version="1.7.0" sparkle:shortVersionString="1.7" length="1179525" type="application/octet-stream" sparkle:edSignature="BZ0MchCAc6oTVWzYlPwp7fY1mUIw1nSJrexztLzEudK0jSkaSIfSVgrBCM/18v2ZeXTyzYLMvg5i4PFgiVcaCw=="/>
 </item>
 </channel></rss>
