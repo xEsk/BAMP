@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Required tool: brew install create-dmg
+
+cd `dirname "$0"`
+
+rm BAMP.dmg
+
+create-dmg --background assets/dmg-background@2x.png --window-size 660 400 --app-drop-link 475 170 --icon BAMP.app 195 170 BAMP.dmg BAMP.app
+
+../updates/tools/sign_update BAMP.dmg
