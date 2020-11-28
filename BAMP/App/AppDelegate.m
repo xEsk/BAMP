@@ -329,7 +329,7 @@
 {
     NSString *conf = [[NSString alloc] initWithContentsOfFile:_apacheConf encoding:NSUTF8StringEncoding error:nil];
     // get the current php used in apache
-    return [conf stringByMatching:@"^LoadModule\\s+php\\d_module\\s+.*\\/usr\\/local\\/Cellar\\/(.*?)\\/(.*?)\\/" capture:2L];
+    return [conf stringByMatching:@"^LoadModule\\s+php\\d?_module\\s+.*\\/usr\\/local\\/Cellar\\/(.*?)\\/(.*?)\\/" capture:2L];
 }
 
 - (NSString *)currentPHPCliVersion
@@ -364,9 +364,15 @@
     {
 		NSString *singleVersion = [php stringByMatching:@"(\\d\\d?)\\." capture:1L];
 		NSString *path = [NSString stringWithFormat:@"/usr/local/Cellar/%@/%@/lib/httpd/modules/libphp%@.so", _phpVersions[php], php, singleVersion];
+        // is the path not valid? Then maybe is a php8 lib path (which doesnt include the version at the end)
+        if ( ! [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:nil])
+        {
+            singleVersion = @"";
+            path = [NSString stringWithFormat:@"/usr/local/Cellar/%@/%@/lib/httpd/modules/libphp.so", _phpVersions[php], php];
+        }
 		// change php apache config
         NSString *conf = [[NSString alloc] initWithContentsOfFile:_apacheConf encoding:NSUTF8StringEncoding error:nil];
-        NSString *phpModule = [conf stringByMatching:@"^LoadModule\\s+php\\d_module\\s+.*"];
+        NSString *phpModule = [conf stringByMatching:@"^LoadModule\\s+php\\d?_module\\s+.*"];
         conf = [conf stringByReplacingOccurrencesOfString:phpModule withString:[NSString stringWithFormat:@"LoadModule php%@_module %@", singleVersion, path]];
         // save changes
         [conf writeToFile:_apacheConf atomically:YES encoding:NSUTF8StringEncoding error:nil];
