@@ -1,3 +1,9 @@
+#1.8
+- Change App icon (macOS Big Sur style)
+- Added support for PHP8
+
+---
+
 #1.7
 - Added automatic updates (using the Sparkle Framework)
 
