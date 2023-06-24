@@ -7,24 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DE06AB222572760D00EEF060 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DED51BE72212E36F0027F6B9 /* Sparkle.framework */; };
+		DE06AB232572760D00EEF060 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DED51BE72212E36F0027F6B9 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DE19F7A220063772007C89E0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = DE19F7A120063772007C89E0 /* AppDelegate.m */; };
 		DE19F7A420063772007C89E0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE19F7A320063772007C89E0 /* Assets.xcassets */; };
 		DE19F7A720063772007C89E0 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DE19F7A520063772007C89E0 /* MainMenu.xib */; };
 		DE19F7AA20063772007C89E0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = DE19F7A920063772007C89E0 /* main.m */; };
 		DE4ED719202DE9700071949B /* NSString+RegEx.m in Sources */ = {isa = PBXBuildFile; fileRef = DE4ED6FD202DE9700071949B /* NSString+RegEx.m */; };
 		DE4ED71C202DE9700071949B /* STPrivilegedTask.m in Sources */ = {isa = PBXBuildFile; fileRef = DE4ED702202DE9700071949B /* STPrivilegedTask.m */; };
-		DED51BEA2212E3B80027F6B9 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DED51BE72212E36F0027F6B9 /* Sparkle.framework */; };
-		DED51BEB2212E3B80027F6B9 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DED51BE72212E36F0027F6B9 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		DED51BEC2212E3B80027F6B9 /* Embed Frameworks */ = {
+		DE06AB242572760D00EEF060 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				DED51BEB2212E3B80027F6B9 /* Sparkle.framework in Embed Frameworks */,
+				DE06AB232572760D00EEF060 /* Sparkle.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -51,18 +51,26 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DED51BEA2212E3B80027F6B9 /* Sparkle.framework in Frameworks */,
+				DE06AB222572760D00EEF060 /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DE06AB212572760D00EEF060 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		DE19F79420063772007C89E0 = {
 			isa = PBXGroup;
 			children = (
 				DE19F79F20063772007C89E0 /* BAMP */,
 				DE19F79E20063772007C89E0 /* Products */,
+				DE06AB212572760D00EEF060 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -150,7 +158,7 @@
 				DE19F79920063772007C89E0 /* Sources */,
 				DE19F79A20063772007C89E0 /* Frameworks */,
 				DE19F79B20063772007C89E0 /* Resources */,
-				DED51BEC2212E3B80027F6B9 /* Embed Frameworks */,
+				DE06AB242572760D00EEF060 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -167,7 +175,7 @@
 		DE19F79520063772007C89E0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0940;
+				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = Beecubu;
 				TargetAttributes = {
 					DE19F79C20063772007C89E0 = {
@@ -257,6 +265,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -314,6 +323,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -344,10 +354,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = BAMP/BAMP.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				CURRENT_PROJECT_VERSION = 1.8.1;
+				DEVELOPMENT_TEAM = 927PDAK37D;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/BAMP/3rd-party",
@@ -365,10 +377,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = BAMP/BAMP.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				CURRENT_PROJECT_VERSION = 1.8.1;
+				DEVELOPMENT_TEAM = 927PDAK37D;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/BAMP/3rd-party",

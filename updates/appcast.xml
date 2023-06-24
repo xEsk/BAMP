@@ -2,9 +2,9 @@
 <channel>
 <title>BAMP</title>
 <item>
-<title>1.8</title>
-<pubDate>sat, 28 nov 2020 19:49:01 +0100</pubDate>
+<title>1.9.0</title>
+<pubDate>sat, 24 jun 2023 14:49:01 +0200</pubDate>
 <sparkle:minimumSystemVersion>10.11</sparkle:minimumSystemVersion>
-<enclosure url="https://github.com/xEsk/BAMP/releases/download/1.8/BAMP.1.8.dmg" sparkle:version="1.8.0" sparkle:shortVersionString="1.8" type="application/octet-stream" sparkle:edSignature="L4EEGYHExHaoB9jSkb1vH4FJslkzsMmg4kB1+1i3TKSOfobd1q+M8XuAnVg6UQy7OhQyvMX3BS9o2yujhmcgAQ==" length="3832551"/>
+<enclosure url="https://github.com/xEsk/BAMP/releases/download/1.9/BAMP.1.9.dmg" sparkle:version="1.9.0" sparkle:shortVersionString="1.9" type="application/octet-stream" sparkle:edSignature="gl0szgkr0HDCc3X3BkRvjyT2c6AQeSY0+x3YKVIRKQe2q3SajKd0ng1TIHr2bYokfAs9zor+9mpJ93k9x3eoAg==" length="3762713"/>
 </item>
 </channel></rss>

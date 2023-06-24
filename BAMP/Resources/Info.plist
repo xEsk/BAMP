@@ -15,26 +15,26 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.8</string>
+	<string>1.9</string>
 	<key>CFBundleVersion</key>
-	<string>1.8.0</string>
+	<string>1.9.0</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2019 Beecubu. All rights reserved.</string>
+	<string>Copyright © 2023 Beecubu. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/xEsk/BAMP/master/updates/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>DEvEBaCb00MT7KwNXzzih21cMWEcD/4D0gMAK8Z5RHc=</string>
 	<key>SecTaskAccess</key>
 	<array>
 		<string>allowed</string>
 	</array>
-	<key>SUPublicEDKey</key>
-	<string>DEvEBaCb00MT7KwNXzzih21cMWEcD/4D0gMAK8Z5RHc=</string>
-	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/xEsk/BAMP/master/updates/appcast.xml</string>
 </dict>
 </plist>
