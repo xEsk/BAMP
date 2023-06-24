@@ -297,7 +297,7 @@
 
 - (void)stopMongoServer
 {
-    if (_mongoAlreadyRunning) return;
+    if (!_mongoAlreadyRunning) return;
     // stop mongo server
     [self runCommand:@"kill `pgrep mongod`"];
 }
