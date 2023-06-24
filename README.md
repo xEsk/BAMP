@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/xEsk/BAMP/raw/master/BAMP/Resources/Assets.xcassets/AppIcon.appiconset/fondo_128.png"/>
+  <img src="https://raw.githubusercontent.com/xEsk/BAMP/master/BAMP/Resources/Assets.xcassets/AppIcon.appiconset/128x128@2x.png"/>
 </p>
 
 ## What is BAMP?
