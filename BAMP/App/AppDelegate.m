@@ -308,7 +308,7 @@
 {
 	NSMutableDictionary *phps = [NSMutableDictionary dictionary];
     // determine installed versions
-    for (NSString *cellar in [[self runCommand:@"brew list"] componentsSeparatedByString:@"\n"])
+    for (NSString *cellar in [[self runCommand:@"brew list --formula"] componentsSeparatedByString:@"\n"])
     {
        if ([cellar isEqualToString:@"php"] || [cellar isMatchedByRegex:@"^php@\\d\\.\\d$"])
        {
