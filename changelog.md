@@ -1,3 +1,9 @@
+#1.9
+- Fixed bug with MongoDB (the mongod service wasn't stopped)
+- Improved support with homebrew
+
+---
+
 #1.8
 - Change App icon (macOS Big Sur style)
 - Added support for PHP8
