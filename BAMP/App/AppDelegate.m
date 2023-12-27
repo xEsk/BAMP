@@ -32,6 +32,8 @@
 @property (weak) IBOutlet NSTableView *uiDocumentRoots;
 @property (weak) IBOutlet NSButton *uiChangePHPCli;
 @property (weak) IBOutlet NSTextField *uiCurrentPHPVersion;
+@property (weak) IBOutlet NSWindow *uiLogWindow;
+@property (strong) IBOutlet NSTextView *uiLogText;
 
 @end
 
@@ -77,6 +79,59 @@
 
 #pragma mark - Tools
 
+- (void)log:(NSString *)logMessage
+{
+    NSLog(@"%@", logMessage);
+    
+    NSString *newLogMessage = [logMessage stringByAppendingString:@"\n"];
+    NSArray *lines = [newLogMessage componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    
+    NSDateFormatter *dateFormatter = [NSDateFormatter new];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    NSFont *font = [NSFont fontWithName:@"Menlo" size:13.f];
+    
+    NSMutableAttributedString *logWithDate = [NSMutableAttributedString new];
+    
+    // create lines to add
+    for (NSInteger i = 0; i < lines.count; i++)
+    {
+        NSString *line = [lines objectAtIndex:i];
+        if (line.length > 0)
+        {
+            NSString *dateString = [dateFormatter stringFromDate:[NSDate date]];
+            NSDictionary *dateAttributes = @{NSForegroundColorAttributeName: (i == 0) ? [NSColor whiteColor] : [NSColor grayColor], NSFontAttributeName: font};
+            NSAttributedString *attributedDate = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ ", dateString] attributes:dateAttributes];
+            
+            // Determine the color of the log line based on prefix
+            NSColor *lineColor = [NSColor blackColor]; // default color
+            if ([line hasPrefix:@"➜ "]) {
+                lineColor = [NSColor blueColor];
+            } else if ([line hasPrefix:@"[SUDO] ➜ "]) {
+                lineColor = [NSColor greenColor];
+            }
+            
+            NSDictionary *logAttributes = @{NSForegroundColorAttributeName: lineColor, NSFontAttributeName: font};
+            NSAttributedString *attributedLine = [[NSAttributedString alloc] initWithString:line attributes:logAttributes];
+            
+            [logWithDate appendAttributedString:attributedDate];
+            [logWithDate appendAttributedString:attributedLine];
+            
+            if (i < lines.count - 1)
+            {
+                NSAttributedString *newline = [[NSAttributedString alloc] initWithString:@"\n" attributes:logAttributes];
+                [logWithDate appendAttributedString:newline];
+            }
+        }
+    }
+    // append the new text
+    [[self.uiLogText textStorage] appendAttributedString:logWithDate];
+    // move scroll to end
+    NSRange range = NSMakeRange(self.uiLogText.textStorage.length, 0); // Cambio aquí para usar textStorage.length
+    [self.uiLogText scrollRangeToVisible:range];
+}
+
+
 - (NSString *)userShell
 {
    return [[NSProcessInfo processInfo] environment][@"SHELL"];
@@ -98,12 +153,10 @@
     [task launch];
 	// get the output
 	NSString *output = [[NSString alloc] initWithData:[[outPipe fileHandleForReading] readDataToEndOfFile] encoding:NSUTF8StringEncoding];
-#ifdef DEBUG
-	NSLog(@"> %@", commandToRun);
-	NSLog(@"-----------------");
-	NSLog(@"%@", output);
-	NSLog(@"=================");
-#endif
+    [self log:[NSString stringWithFormat:@"➜ %@", commandToRun]];
+    //[self log:@"-----------------"];
+    [self log:[NSString stringWithFormat:@"%@", output]];
+    [self log:@"================="];
     // capture output
 	return output;
 }
@@ -123,12 +176,9 @@
         [task waitUntilExit];
 		// get the output
 		NSString *output = [[NSString alloc] initWithData:[[task outputFileHandle] readDataToEndOfFile] encoding:NSUTF8StringEncoding];
-#ifdef DEBUG
-		NSLog(@"[SUDO] > %@", commandToRun);
-		NSLog(@"-----------------");
-		NSLog(@"%@", output);
-		NSLog(@"=================");
-#endif
+        [self log:[NSString stringWithFormat:@"[SUDO] ➜ %@", commandToRun]];
+        [self log:[NSString stringWithFormat:@"%@", output]];
+        [self log:@"================="];
         // capture output
 		return output;
     }
@@ -154,7 +204,8 @@
         // exists?
         if ( ! [[NSFileManager defaultManager] fileExistsAtPath:_apacheConf])
         {
-            NSLog(@"Error: Apache conf not found at %@", _apacheConf);
+            //NSLog(@"Error: Apache conf not found at %@", _apacheConf);
+            [self log:[NSString stringWithFormat:@"Error: Apache conf not found at %@", _apacheConf]];
             // clean-up
             _apacheConf = nil;
         }
@@ -429,6 +480,13 @@
 		[alert addButtonWithTitle:@"Continue"];
 		[alert runModal];
 	}
+}
+
+#pragma mark - Log window methods
+
+- (IBAction)showLogWindow:(id)sender
+{
+    [self.uiLogWindow makeKeyAndOrderFront:nil];
 }
 
 #pragma mark - Document root methods
